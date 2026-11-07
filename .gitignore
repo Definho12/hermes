@@ -1,0 +1,12 @@
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+out/
+app/src/main/res/font/
+desktop/bundled/windows/
+desktop/src/main/resources/fonts/
+desktop/build/
+desktop/.gradle/
+app/*.keystore

@@ -1,0 +1,45 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["desktop/**", ".github/workflows/desktop.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04          # already has the Android SDK
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: "17" }
+      - uses: gradle/actions/setup-gradle@v5
+        with: { gradle-version: "8.11.1" }
+      - name: Fonts
+        run: bash ci/fonts.sh "$PWD/app/src/main/res/font"
+      - name: Signing key
+        env:
+          KEY: ${{ secrets.HERMES_KEYSTORE }}
+        run: |
+          # the key lives in a private GitHub secret, never in the repository (same key every build)
+          if [ -z "$KEY" ]; then echo "::error::falta o segredo HERMES_KEYSTORE no GitHub"; exit 1; fi
+          printf '%s' "$KEY" | tr -d ' \n\r' | base64 -d > app/hermes.keystore
+      - name: Build
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          set -o pipefail
+          gradle :app:testReleaseUnitTest :app:assembleRelease --no-daemon --console=plain 2>&1 | tee build.log
+      - name: Report errors          # makes the errors readable through the API (the logs are blocked)
+        if: failure()
+        run: |
+          { grep -E "^e: |error:|AssertionError|Test.*FAILED|expected:" build.log; grep -A6 "What went wrong" build.log; tail -15 build.log; } | head -45 | while IFS= read -r line; do echo "::error::${line}"; done || true
+      - name: Publish APK to the "apk" branch
+        run: |
+          mkdir out && cp app/build/outputs/apk/release/app-release.apk out/Hermes.apk
+          cd out && git init -q -b apk
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add Hermes.apk && git commit -q -m "build ${{ github.run_number }}"
+          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" apk

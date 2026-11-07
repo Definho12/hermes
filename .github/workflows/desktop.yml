@@ -1,0 +1,98 @@
+name: Hermes for Windows
+
+on:
+  push:
+    branches: [main]
+    paths: ["desktop/**", "app/src/main/java/com/guilherme/hermes/shared/**", "ci/**", ".github/workflows/desktop.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # Real downloads (yt-dlp + ffmpeg) from a small local video, and screenshots under a virtual screen.
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: "17" }
+      - uses: gradle/actions/setup-gradle@v5
+        with: { gradle-version: "8.11.1" }
+      - name: Tools
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg xvfb > /dev/null
+          pipx install yt-dlp > /dev/null && yt-dlp --version
+      - name: Fonts
+        run: bash ci/fonts.sh "$PWD/desktop/src/main/resources/fonts"
+      - name: Test server
+        run: bash ci/test-server.sh
+      - name: Tests
+        working-directory: desktop
+        run: |
+          set -o pipefail
+          export HERMES_TEST_URL="http://127.0.0.1:8765/Video%20de%20teste.mp4" APPDATA=/tmp/appdata-test
+          gradle test --no-daemon --console=plain 2>&1 | tee ../build.log
+      - name: Screenshots
+        working-directory: desktop
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/shots
+          export HERMES_SCREENSHOT=/tmp/shots/shot.png APPDATA=/tmp/appdata
+          timeout 600 xvfb-run -a -s "-screen 0 1400x900x24" gradle run --no-daemon --console=plain 2>&1 | tee -a ../build.log
+          ls -la /tmp/shots
+          cp /tmp/appdata/Hermes/log.txt /tmp/shots/log.txt || true
+      - name: Report errors
+        if: failure()
+        run: |
+          { grep -E "^e: |error:|AssertionError|Exception|FAILED|What went wrong|expected" build.log; tail -25 build.log; } | head -60 | while IFS= read -r line; do echo "::error::${line}"; done || true
+      - name: Publish screenshots
+        run: |
+          cd /tmp/shots
+          git init -q -b shots
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add . && git commit -q -m "screenshots ${{ github.run_number }}"
+          git push -q --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" shots
+
+  windows:
+    needs: check
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: "17" }
+      - uses: gradle/actions/setup-gradle@v5
+        with: { gradle-version: "8.11.1" }
+      - name: Fonts
+        run: bash ci/fonts.sh "$PWD/desktop/src/main/resources/fonts"
+      - name: Bundle yt-dlp and ffmpeg
+        run: |
+          curl -sSL -o ff.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-lgpl-shared.zip
+          unzip -q ff.zip -d ff
+          mkdir -p desktop/bundled/windows
+          cp ff/*/bin/* desktop/bundled/windows/
+          cp ff/*/LICENSE.txt desktop/bundled/windows/FFMPEG-LICENSE.txt || true
+          curl -sSL -o desktop/bundled/windows/yt-dlp.exe https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe
+          ls -la desktop/bundled/windows
+      - name: Build
+        working-directory: desktop
+        run: |
+          set -o pipefail
+          gradle createDistributable packageMsi --no-daemon --console=plain 2>&1 | tee ../build.log
+          cp build/compose/binaries/main/msi/*.msi ../Hermes-Windows.msi
+      - name: Report errors
+        if: failure()
+        run: |
+          { grep -E "^e: |error:|What went wrong" build.log; tail -15 build.log; } | head -45 | while IFS= read -r line; do echo "::error::${line}"; done || true
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path desktop/build/compose/binaries/main/app/Hermes -DestinationPath Hermes-Windows.zip
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "Hermes para Windows" --notes "Versão mais recente do Hermes para Windows." --latest
+          gh release upload latest Hermes-Windows.msi Hermes-Windows.zip --clobber
