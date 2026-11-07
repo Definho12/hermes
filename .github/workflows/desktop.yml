@@ -1,4 +1,4 @@
-name: Hermes for Windows
+name: Swallow for Windows
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
           export HERMES_SCREENSHOT=/tmp/shots/shot.png APPDATA=/tmp/appdata
           timeout 600 xvfb-run -a -s "-screen 0 1400x900x24" gradle run --no-daemon --console=plain 2>&1 | tee -a ../build.log
           ls -la /tmp/shots
-          cp /tmp/appdata/Hermes/log.txt /tmp/shots/log.txt || true
+          cp /tmp/appdata/Swallow/log.txt /tmp/shots/log.txt || true
       - name: Report errors
         if: failure()
         run: |
@@ -82,17 +82,17 @@ jobs:
         run: |
           set -o pipefail
           gradle createDistributable packageMsi --no-daemon --console=plain 2>&1 | tee ../build.log
-          cp build/compose/binaries/main/msi/*.msi ../Hermes-Windows.msi
+          cp build/compose/binaries/main/msi/*.msi ../Swallow-Windows.msi
       - name: Report errors
         if: failure()
         run: |
           { grep -E "^e: |error:|What went wrong" build.log; tail -15 build.log; } | head -45 | while IFS= read -r line; do echo "::error::${line}"; done || true
       - name: Zip
         shell: pwsh
-        run: Compress-Archive -Path desktop/build/compose/binaries/main/app/Hermes -DestinationPath Hermes-Windows.zip
+        run: Compress-Archive -Path desktop/build/compose/binaries/main/app/Swallow -DestinationPath Swallow-Windows.zip
       - name: Publish release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release view latest >/dev/null 2>&1 || gh release create latest --title "Hermes para Windows" --notes "Versão mais recente do Hermes para Windows." --latest
-          gh release upload latest Hermes-Windows.msi Hermes-Windows.zip --clobber
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "Swallow para Windows" --notes "Versão mais recente do Swallow para Windows." --latest
+          gh release upload latest Swallow-Windows.msi Swallow-Windows.zip --clobber

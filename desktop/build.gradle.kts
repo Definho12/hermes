@@ -42,18 +42,18 @@ compose.desktop {
         )
         nativeDistributions {
             targetFormats(TargetFormat.Msi)
-            packageName = "Hermes"
+            packageName = "Swallow"
             // a new number every build, so the installer updates over the previous one
             packageVersion = "1.0.${System.getenv("GITHUB_RUN_NUMBER") ?: "0"}"
-            description = "Hermes - baixar videos e audios"
+            description = "Swallow - baixar videos e audios"
             vendor = "Guilherme"
             modules("java.desktop", "java.logging", "jdk.unsupported")
             windows {
-                menuGroup = "Hermes"
+                menuGroup = "Swallow"
                 shortcut = true
                 dirChooser = true
                 upgradeUuid = "c4a7e2d9-5b13-4f86-9e2a-7d0b6f1c3e58"
-                iconFile.set(project.file("icon/hermes.ico"))
+                iconFile.set(project.file("icon/swallow.ico"))
             }
             // yt-dlp.exe and ffmpeg go here (the workflow downloads them)
             appResourcesRootDir.set(project.layout.projectDirectory.dir("bundled"))

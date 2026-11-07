@@ -53,10 +53,10 @@ data class Item(
 
 /**
  * Downloads one thing at a time with yt-dlp and puts the result where the phone's other apps
- * see it: videos in Filmes/Hermes (gallery), audio in Música/Hermes.
+ * see it: videos in Filmes/Swallow (gallery), audio in Música/Swallow.
  */
 object Engine {
-    private const val TAG = "Hermes"
+    private const val TAG = "Swallow"
     private lateinit var app: Context
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val ready = CompletableDeferred<Boolean>()
@@ -259,9 +259,9 @@ object Engine {
     }
 
     fun folderFor(mime: String): String = when {
-        mime.startsWith("video") -> Environment.DIRECTORY_MOVIES + "/Hermes"
-        mime.startsWith("audio") -> Environment.DIRECTORY_MUSIC + "/Hermes"
-        else -> Environment.DIRECTORY_DOWNLOADS + "/Hermes"
+        mime.startsWith("video") -> Environment.DIRECTORY_MOVIES + "/Swallow"
+        mime.startsWith("audio") -> Environment.DIRECTORY_MUSIC + "/Swallow"
+        else -> Environment.DIRECTORY_DOWNLOADS + "/Swallow"
     }
 
     private fun mimeOf(f: File): String {

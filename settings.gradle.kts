@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Hermes"
+rootProject.name = "Swallow"
 include(":app")

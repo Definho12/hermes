@@ -43,7 +43,7 @@ fun DrawScope.drawIco(i: Ico, color: Color) {
     }
     when (i) {
         Ico.Mark -> {
-            // Hermes: an arrow coming down onto a line, with a small wing on the shaft
+            // download mark: an arrow coming down onto a line, with a small wing on the shaft
             line(0.5f, 0.12f, 0.5f, 0.66f)
             path(0.3f, 0.47f, 0.5f, 0.67f, 0.7f, 0.47f)
             line(0.2f, 0.86f, 0.8f, 0.86f)

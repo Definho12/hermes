@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
-    /** Text shared from another app ("Compartilhar" → Hermes), waiting to go into the box. */
+    /** Text shared from another app ("Compartilhar" → Swallow), waiting to go into the box. */
     private var incoming by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +23,8 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) take(intent)
         askNotifications()
         setContent {
-            HermesTheme {
-                HermesApp(incoming) { incoming = null }
+            SwallowTheme {
+                SwallowApp(incoming) { incoming = null }
             }
         }
     }

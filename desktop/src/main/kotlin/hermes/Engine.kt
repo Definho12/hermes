@@ -121,7 +121,7 @@ object Engine {
     }
 
     private fun update(quiet: Boolean) {
-        if (!ytdlp.exists()) { if (!quiet) updateStatus = "Só dá para atualizar a cópia do Hermes"; return }
+        if (!ytdlp.exists()) { if (!quiet) updateStatus = "Só dá para atualizar a cópia do Swallow"; return }
         updateStatus = "Atualizando…"
         val out = cmd(180, ytdlp.path, "-U") ?: ""
         version = cmd(30, ytdlp.path, "--version")?.trim()?.lines()?.lastOrNull()
@@ -189,7 +189,7 @@ object Engine {
         val yt = ytdlpCmd()
         if (yt == null) {
             item.state = State.Failed; item.message = "O motor de download (yt-dlp) não foi encontrado"
-            item.detail = "Procurei em ${ytdlp.path}. Reinstale o Hermes."
+            item.detail = "Procurei em ${ytdlp.path}. Reinstale o Swallow."
             return
         }
         val tmp = File(AppDirs.tmp, item.id.toString()).apply { deleteRecursively(); mkdirs() }

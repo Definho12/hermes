@@ -15,11 +15,11 @@ fun main() {
     try {
         realMain()
     } catch (e: Throwable) {
-        Log.error("abrir o Hermes", e)
+        Log.error("abrir o Swallow", e)
         try {
             javax.swing.JOptionPane.showMessageDialog(
-                null, "O Hermes não conseguiu abrir:\n${e::class.java.simpleName}: ${e.message}\n\nDetalhes em %APPDATA%\\Hermes\\log.txt",
-                "Hermes", javax.swing.JOptionPane.ERROR_MESSAGE
+                null, "O Swallow não conseguiu abrir:\n${e::class.java.simpleName}: ${e.message}\n\nDetalhes em %APPDATA%\\Swallow\\log.txt",
+                "Swallow", javax.swing.JOptionPane.ERROR_MESSAGE
             )
         } catch (_: Throwable) {}
         kotlin.system.exitProcess(1)
@@ -61,19 +61,19 @@ private fun realMain() {
                 else {
                     val r = javax.swing.JOptionPane.showConfirmDialog(
                         Win.window, "Ainda tem $busy download(s) em andamento. Fechar e cancelar?",
-                        "Hermes", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE,
+                        "Swallow", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE,
                     )
                     if (r == javax.swing.JOptionPane.YES_OPTION) quit()
                 }
             },
-            title = "Hermes",
+            title = "Swallow",
             icon = painterResource("img/icon.png"),
             state = state,
         ) {
             window.minimumSize = java.awt.Dimension(860, 540)
             SideEffect { Win.window = window; Win.state = state }
             LaunchedEffect(window) { TitleBar.applyDark(window) }
-            HermesTheme { App(window) }
+            SwallowTheme { App(window) }
             if (shot != null) ScreenshotRunner(shot, window) { quit() }
         }
     }

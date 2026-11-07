@@ -69,7 +69,7 @@ import com.guilherme.hermes.shared.Mode
 import com.guilherme.hermes.shared.Quality
 
 @Composable
-fun HermesApp(incoming: String?, onIncomingUsed: () -> Unit) {
+fun SwallowApp(incoming: String?, onIncomingUsed: () -> Unit) {
     val items by Engine.items.collectAsState()
     var text by remember { mutableStateOf("") }
     var choice by remember { mutableStateOf(Engine.lastChoice) }
@@ -91,9 +91,9 @@ fun HermesApp(incoming: String?, onIncomingUsed: () -> Unit) {
         Modifier.fillMaxSize().background(C.Bg).statusBarsPadding().navigationBarsPadding().imePadding()
     ) {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Ico.Mark, C.Accent, 22.dp)
+            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.mark), null, Modifier.size(28.dp))
             Spacer(Modifier.width(10.dp))
-            Text("Hermes", color = C.Text, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, fontFamily = Inter)
+            Text("Swallow", color = C.Text, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, fontFamily = Inter)
             Spacer(Modifier.weight(1f))
             if (items.any { !it.active }) {
                 TextButton(onClick = { Engine.clearFinished() }) { Text("Limpar lista", color = C.Sub, fontSize = 13.sp) }
@@ -359,7 +359,7 @@ private fun EmptyHint() {
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text("Funciona com YouTube, Instagram, TikTok, X, Facebook, Reddit, Kwai, SoundCloud, Vimeo, Twitch e centenas de outros sites.",
             color = C.Sub, fontSize = 14.sp, fontFamily = Inter, lineHeight = 20.sp)
-        Text("Dica: em qualquer app, toque em Compartilhar e escolha Hermes.",
+        Text("Dica: em qualquer app, toque em Compartilhar e escolha Swallow.",
             color = C.Faint, fontSize = 13.sp, fontFamily = Inter, lineHeight = 18.sp)
     }
 }
@@ -369,7 +369,7 @@ private fun Footer() {
     val version by Engine.version.collectAsState()
     val status by Engine.updateStatus.collectAsState()
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Vídeos ficam em Filmes › Hermes (aparecem na galeria). Áudios ficam em Música › Hermes.",
+        Text("Vídeos ficam em Filmes › Swallow (aparecem na galeria). Áudios ficam em Música › Swallow.",
             color = C.Faint, fontSize = 12.sp, fontFamily = Inter, lineHeight = 17.sp)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Motor de download: " + (version ?: "preparando…") + (status?.let { " · $it" } ?: ""),

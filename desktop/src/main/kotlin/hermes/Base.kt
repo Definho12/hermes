@@ -17,17 +17,21 @@ import java.util.Locale
 
 val isWindows: Boolean = System.getProperty("os.name").lowercase().contains("win")
 
-/** Where Hermes keeps its things: %APPDATA%\Hermes (settings, history, its own copy of yt-dlp and the log). */
+/** Where Swallow keeps its things: %APPDATA%\Swallow (settings, history, its own copy of yt-dlp and the log). */
 object AppDirs {
     val data: File by lazy {
         val base = System.getenv("APPDATA")?.let { File(it) } ?: File(System.getProperty("user.home"), ".config")
-        File(base, "Hermes").apply { mkdirs() }
+        val dir = File(base, "Swallow")
+        // it used to be called Hermes: keep its settings, history and yt-dlp copy
+        val old = File(base, "Hermes")
+        if (!dir.exists() && old.isDirectory) old.renameTo(dir)
+        dir.apply { mkdirs() }
     }
     val bin: File by lazy { File(data, "bin").apply { mkdirs() } }
     val tmp: File by lazy { File(data, "temp").apply { mkdirs() } }
 }
 
-/** A small diary of what Hermes did (AppData\Hermes\log.txt), so problems can be found. */
+/** A small diary of what Swallow did (AppData\Swallow\log.txt), so problems can be found. */
 object Log {
     private val file: File by lazy {
         File(AppDirs.data, "log.txt").also { f ->
@@ -45,7 +49,7 @@ object Log {
 }
 
 /**
- * Only one Hermes at a time: the running one holds a lock on a small file. A second start leaves a
+ * Only one Swallow at a time: the running one holds a lock on a small file. A second start leaves a
  * "show" note for the first one (which brings its window forward) and quits.
  */
 object SingleInstance {
@@ -60,12 +64,12 @@ object SingleInstance {
             channel = ch
             ch.tryLock()
         } catch (e: Exception) {
-            // couldn't even check (antivirus, permissions…): never block Hermes from opening because of that
+            // couldn't even check (antivirus, permissions…): never block Swallow from opening because of that
             Log.error("verificar se já está aberto", e)
             return true
         }
         if (l == null) {
-            Log.w("outro Hermes já está aberto: pedindo para ele aparecer")
+            Log.w("outro Swallow já está aberto: pedindo para ele aparecer")
             try { showFile.writeText(System.currentTimeMillis().toString()) } catch (_: Exception) {}
             return false
         }
@@ -84,12 +88,12 @@ object SingleInstance {
                 }
             } catch (_: Exception) {
             }
-        }, "hermes-single-instance").apply { isDaemon = true; start() }
+        }, "swallow-single-instance").apply { isDaemon = true; start() }
         return true
     }
 }
 
-/** Paints Windows' own title bar dark, in Hermes' colors. */
+/** Paints Windows' own title bar dark, in Swallow' colors. */
 object TitleBar {
     private interface Dwm : StdCallLibrary {
         fun DwmSetWindowAttribute(hwnd: WinDef.HWND, attr: Int, value: IntByReference, size: Int): Int

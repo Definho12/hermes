@@ -9,9 +9,9 @@ import java.io.File
 
 object Settings {
     private val file get() = File(AppDirs.data, "settings.json")
-    private val defaultFolder = File(System.getProperty("user.home"), "Downloads${File.separator}Hermes")
+    private val defaultFolder = File(System.getProperty("user.home"), "Downloads${File.separator}Swallow")
 
-    /** Where finished downloads go (Downloads\Hermes unless the person picks another folder). */
+    /** Where finished downloads go (Downloads\Swallow unless the person picks another folder). */
     var folder by mutableStateOf(defaultFolder)
     var choice by mutableStateOf(Choice())
 
@@ -20,6 +20,8 @@ object Settings {
             if (!file.exists()) return
             val o = JSONObject(file.readText())
             o.optString("folder", "").takeIf { it.isNotBlank() }?.let { folder = File(it) }
+            // the old default folder (Downloads\Hermes) becomes Downloads\Swallow; files already there stay where they are
+            if (folder == File(System.getProperty("user.home"), "Downloads${File.separator}Hermes")) folder = defaultFolder
             choice = Choice.decode(o.optString("choice", ""))
         } catch (e: Exception) { Log.error("ler settings.json", e) }
     }

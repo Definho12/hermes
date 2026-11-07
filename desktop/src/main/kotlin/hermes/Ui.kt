@@ -90,9 +90,9 @@ fun App(window: java.awt.Window) {
             Modifier.fillMaxWidth().background(C.Bar).padding(start = 22.dp, end = 14.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(Ico.Mark, C.Accent, 22.dp)
+            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource("img/mark.png"), null, Modifier.size(28.dp))
             Spacer(Modifier.width(10.dp))
-            Text("Hermes", color = C.Text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, fontFamily = Inter)
+            Text("Swallow", color = C.Text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, fontFamily = Inter)
             Spacer(Modifier.weight(1f))
             Text("Salvando em  ", color = C.Faint, fontSize = 13.sp, fontFamily = Inter)
             Text(prettyPath(Settings.folder), color = C.Sub, fontSize = 13.sp, fontFamily = Inter, maxLines = 1, overflow = TextOverflow.Ellipsis,

@@ -21,9 +21,9 @@ object C {
     val Text = Color(0xFFE8E9EC)
     val Sub = Color(0xFF9A9EA6)
     val Faint = Color(0xFF62666D)
-    val Accent = Color(0xFF9DB4FF)
-    val AccentDim = Color(0xFF9DB4FF).copy(alpha = 0.14f)
-    val OnAccent = Color(0xFF0D1426)
+    val Accent = Color(0xFF8FD9AE)
+    val AccentDim = Color(0xFF8FD9AE).copy(alpha = 0.14f)
+    val OnAccent = Color(0xFF0B1F14)
     val Bad = Color(0xFFF08A7E)
 }
 
@@ -34,7 +34,7 @@ val Inter = FontFamily(
 )
 
 @Composable
-fun HermesTheme(content: @Composable () -> Unit) {
+fun SwallowTheme(content: @Composable () -> Unit) {
     val base = Typography()
     fun TextStyle.inter() = copy(fontFamily = Inter)
     MaterialTheme(

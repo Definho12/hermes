@@ -12,9 +12,9 @@
         android:allowBackup="false"
         android:extractNativeLibs="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Hermes"
+        android:label="Swallow"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Hermes">
+        android:theme="@style/Theme.Swallow">
 
         <activity
             android:name=".MainActivity"
@@ -26,7 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!-- "Compartilhar" in YouTube, Instagram, TikTok… sends the link here -->
-            <intent-filter android:label="Baixar com Hermes">
+            <intent-filter android:label="Baixar com Swallow">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />

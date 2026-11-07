@@ -77,7 +77,7 @@ class DownloadService : Service() {
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setContentIntent(openApp(this))
-            .setColor(0xFF9DB4FF.toInt())
+            .setColor(0xFF8FD9AE.toInt())
         if (item == null) return b.setContentTitle("Preparando o download…").setProgress(0, 0, true).build()
         val more = if (count > 1) " · mais ${count - 1} na fila" else ""
         return b.setContentTitle(item.shownTitle.take(80))
@@ -128,10 +128,10 @@ class DownloadService : Service() {
             val n = NotificationCompat.Builder(ctx, CH_DONE)
                 .setSmallIcon(R.drawable.ic_notif)
                 .setContentTitle("Pronto: " + item.shownTitle.take(80))
-                .setContentText(if (file?.mime?.startsWith("video") == true) "Salvo em Filmes › Hermes" else "Salvo em Música › Hermes")
+                .setContentText(if (file?.mime?.startsWith("video") == true) "Salvo em Filmes › Swallow" else "Salvo em Música › Swallow")
                 .setContentIntent(tap)
                 .setAutoCancel(true)
-                .setColor(0xFF9DB4FF.toInt())
+                .setColor(0xFF8FD9AE.toInt())
                 .build()
             try { NotificationManagerCompat.from(ctx).notify(item.id.toInt(), n) } catch (_: SecurityException) {}
         }

@@ -1,7 +1,7 @@
 package com.guilherme.hermes.shared
 
 /*
- * The rules of Hermes, shared file for file by the phone app and the Windows app:
+ * The rules of Swallow, shared file for file by the phone app and the Windows app:
  * what to ask yt-dlp for (video or audio, which quality), how to read its progress,
  * and how to turn its errors into plain Portuguese.
  */
