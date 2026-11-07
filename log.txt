@@ -1,0 +1,3 @@
+07/11 21:45:18.071  iniciando (Java 17.0.21, Linux)
+07/11 21:45:19.343  yt-dlp: /opt/pipx_bin/yt-dlp versão 2026.10.26 · ffmpeg: /usr/bin
+07/11 21:45:30.384  saindo
