@@ -116,8 +116,10 @@ object Photos {
         )
         for ((url, parse) in tries) {
             try {
-                val found = parse(text(url))
+                val body = text(url)
+                val found = parse(body)
                 log("${url.substringBefore('?')}: ${found.size} foto(s)")
+                if (found.isEmpty()) log("  resposta: " + body.replace(Regex("\\s+"), " ").take(900))
                 if (found.isNotEmpty()) return found
             } catch (e: Exception) {
                 log("${url.substringBefore('?')}: ${e.message}")
