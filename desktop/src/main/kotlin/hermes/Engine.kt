@@ -237,10 +237,10 @@ object Engine {
         // no video there: maybe it is a post with only pictures (an X post with a photo, for example)
         var photoTrace = ""
         if (made.isEmpty() && (photoOnly || Photos.tweet(item.source) != null || Photos.worthTrying(out.toString()))) {
-            item.message = "Procurando a imagem…"; item.pct = 0f
+            item.message = "Procurando a mídia do post…"; item.pct = 0f
             val pd = File(tmp, "fotos").apply { mkdirs() }
             made = try {
-                Photos.download(item.source, pd) { i, n -> item.message = if (n > 1) "Baixando imagem $i de $n" else "Baixando a imagem"; item.pct = 100f * (i - 1) / n }
+                Photos.download(item.source, pd) { i, n -> item.message = if (n > 1) "Baixando $i de $n" else "Baixando do post"; item.pct = 100f * (i - 1) / n }
             } catch (e: Exception) { Log.error("imagens", e); emptyList() }
             photoTrace = Photos.trace.toString()
             Log.w("imagens (${item.source}): ${photoTrace.lines().filter { it.isNotBlank() }.joinToString(" | ")}")
@@ -249,7 +249,7 @@ object Engine {
         if (made.isEmpty()) {
             val text = out.toString()
             item.state = State.Failed
-            item.message = if (photoOnly) "Não consegui pegar a imagem desse post" else Formats.friendly(if (code == 0) "" else text)
+            item.message = if (photoOnly) "Não consegui pegar a imagem ou o GIF desse post" else Formats.friendly(if (code == 0) "" else text)
             item.detail = (text.lines().filter { it.isNotBlank() }.takeLast(25) + listOfNotNull(photoTrace.takeIf { it.isNotBlank() }?.let { "\nImagens:\n$it" })).joinToString("\n")
             Log.w("falhou (${item.source}): ${Formats.errorLine(text)}")
             tmp.deleteRecursively()

@@ -15,7 +15,8 @@ class PhotosNetTest {
         println("TRACE:\n" + Photos.trace)
         println("FILES: " + files.joinToString { "${it.name} ${it.length()}" })
         assertTrue("no picture:\n${Photos.trace}", files.size == 1 && files[0].length() > 5_000)
-        val head = files[0].readBytes().take(4).map { it.toInt() and 0xff }
-        assertTrue("not an image: $head", head[0] == 0xFF || head[0] == 0x89 || head[0] == 'R'.code)
+        val head = files[0].readBytes().take(12).map { it.toInt() and 0xff }
+        val mp4 = head.size >= 8 && String(head.subList(4, 8).map { it.toByte() }.toByteArray()) == "ftyp"
+        assertTrue("not an image or video: $head", mp4 || head[0] == 0xFF || head[0] == 0x89 || head[0] == 'R'.code)
     }
 }

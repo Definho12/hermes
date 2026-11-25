@@ -6,9 +6,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /*
- * Pictures. yt-dlp only knows video and audio, so a post with only photos (an X post with
- * a picture, for example) fails there. This finds the post's photos and downloads them in
- * full size. Shared file for file by the phone app and the Windows app.
+ * Pictures and GIFs of a post. yt-dlp only knows video and audio, so a post with only photos
+ * (an X post with a picture, for example) fails there; X's GIFs also have ".../photo/1" links.
+ * This finds the post's media (photos in full size, GIFs/videos as the best MP4) and downloads it.
+ * Shared file for file by the phone app and the Windows app.
  */
 object Photos {
     private const val UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
@@ -80,31 +81,52 @@ object Photos {
         return "${m.groupValues[1]}?format=${m.groupValues[2]}&name=orig"
     }
 
-    /** Photo addresses in X's embed answer (newer and older shapes). */
+    /** The best MP4 among X's video variants. */
+    private fun bestMp4(variants: org.json.JSONArray?): String? {
+        variants ?: return null
+        var best: String? = null; var rate = -1
+        for (k in 0 until variants.length()) variants.getJSONObject(k).let { v ->
+            val type = v.optString("content_type", v.optString("type"))
+            val u = v.optString("url", v.optString("src"))
+            if (u.isNotBlank() && ("mp4" in type || u.contains(".mp4"))) {
+                val r = v.optInt("bitrate", 0); if (r > rate) { rate = r; best = u }
+            }
+        }
+        return best
+    }
+
+    /** Media addresses in X's embed answer (photos, GIFs, videos), in the post's order. */
     fun photosFromSyndication(json: String): List<String> {
         val o = JSONObject(json); val out = ArrayList<String>()
         o.optJSONArray("mediaDetails")?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).let { m ->
-                if (m.optString("type") == "photo") m.optString("media_url_https").takeIf { it.isNotBlank() }?.let { out += it }
+                when (m.optString("type")) {
+                    "photo" -> m.optString("media_url_https").takeIf { it.isNotBlank() }?.let { out += original(it) }
+                    "animated_gif", "video" -> bestMp4(m.optJSONObject("video_info")?.optJSONArray("variants"))?.let { out += it }
+                }
             }
         }
         if (out.isEmpty()) o.optJSONArray("photos")?.let { a ->
-            for (i in 0 until a.length()) a.getJSONObject(i).optString("url").takeIf { it.isNotBlank() }?.let { out += it }
+            for (i in 0 until a.length()) a.getJSONObject(i).optString("url").takeIf { it.isNotBlank() }?.let { out += original(it) }
         }
-        return out.map(::original).distinct()
+        if (out.isEmpty()) o.optJSONObject("video")?.optJSONArray("variants")?.let { v -> bestMp4(v)?.let { out += it } }
+        return out.distinct()
     }
 
     /** fxtwitter / vxtwitter answers. */
     fun photosFromMirror(json: String): List<String> {
         val o = JSONObject(json); val out = ArrayList<String>()
-        o.optJSONObject("tweet")?.optJSONObject("media")?.optJSONArray("photos")?.let { a ->
+        val media = o.optJSONObject("tweet")?.optJSONObject("media")
+        media?.optJSONArray("all")?.let { a ->
+            for (i in 0 until a.length()) a.getJSONObject(i).optString("url").takeIf { it.isNotBlank() }?.let { out += it }
+        }
+        if (out.isEmpty()) for (key in listOf("photos", "videos")) media?.optJSONArray(key)?.let { a ->
             for (i in 0 until a.length()) a.getJSONObject(i).optString("url").takeIf { it.isNotBlank() }?.let { out += it }
         }
         if (out.isEmpty()) o.optJSONArray("media_extended")?.let { a ->
-            for (i in 0 until a.length()) a.getJSONObject(i).let { m ->
-                if (m.optString("type") == "image") m.optString("url").takeIf { it.isNotBlank() }?.let { out += it }
-            }
+            for (i in 0 until a.length()) a.getJSONObject(i).optString("url").takeIf { it.isNotBlank() }?.let { out += it }
         }
+        if (out.isEmpty()) o.optJSONArray("mediaURLs")?.let { a -> for (i in 0 until a.length()) a.optString(i).takeIf { it.isNotBlank() }?.let { out += it } }
         return out.map(::original).distinct()
     }
 
@@ -119,7 +141,11 @@ object Photos {
                 val body = text(url)
                 val found = parse(body)
                 log("${url.substringBefore('?')}: ${found.size} foto(s)")
-                if (found.isEmpty()) log("  resposta: " + body.replace(Regex("\\s+"), " ").take(900))
+                if (found.isEmpty()) {
+                    val flat = body.replace(Regex("\\s+"), " ")
+                    val at = listOf("mediaDetails", "\"media\"", "video").map { flat.indexOf(it) }.filter { it >= 0 }.minOrNull() ?: 0
+                    log("  resposta: " + flat.substring(at).take(900))
+                }
                 if (found.isNotEmpty()) return found
             } catch (e: Exception) {
                 log("${url.substringBefore('?')}: ${e.message}")
@@ -173,9 +199,9 @@ object Photos {
                 val c = open(link)
                 val type = c.contentType.orEmpty().lowercase()
                 val ext = when {
-                    "png" in type -> "png"; "webp" in type -> "webp"; "gif" in type -> "gif"; "avif" in type -> "avif"
+                    "mp4" in type -> "mp4"; "png" in type -> "png"; "webp" in type -> "webp"; "gif" in type -> "gif"; "avif" in type -> "avif"
                     "jpeg" in type || "jpg" in type -> "jpg"
-                    else -> Regex("[.?&](?:format=)?(jpe?g|png|webp|gif)\\b").find(link)?.groupValues?.get(1)?.replace("jpeg", "jpg") ?: "jpg"
+                    else -> Regex("[.?&](?:format=)?(jpe?g|png|webp|gif|mp4)\\b").find(link)?.groupValues?.get(1)?.replace("jpeg", "jpg") ?: "jpg"
                 }
                 val name = if (links.size == 1) "$base.$ext" else "$base-${i + 1}.$ext"
                 val f = File(dir, name)

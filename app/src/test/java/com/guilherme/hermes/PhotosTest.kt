@@ -44,6 +44,16 @@ class PhotosTest {
             Photos.photosFromPage("""<head><meta property="og:image" content="https://i.example.com/a.jpg?x=1&amp;y=2"><meta name="twitter:image" content="https://other/b.jpg"></head>"""))
     }
 
+    @Test fun readsGifs() {
+        val syn = """{"mediaDetails":[{"type":"animated_gif","media_url_https":"https://pbs.twimg.com/tweet_video_thumb/G.jpg",
+            "video_info":{"variants":[{"bitrate":0,"content_type":"video/mp4","url":"https://video.twimg.com/tweet_video/G.mp4"}]}},
+            {"type":"video","video_info":{"variants":[{"content_type":"application/x-mpegURL","url":"https://v/p.m3u8"},
+            {"bitrate":256000,"content_type":"video/mp4","url":"https://v/low.mp4"},{"bitrate":2176000,"content_type":"video/mp4","url":"https://v/high.mp4"}]}}]}"""
+        assertEquals(listOf("https://video.twimg.com/tweet_video/G.mp4", "https://v/high.mp4"), Photos.photosFromSyndication(syn))
+        assertEquals(listOf("https://video.twimg.com/tweet_video/G.mp4"),
+            Photos.photosFromMirror("""{"tweet":{"media":{"all":[{"type":"gif","url":"https://video.twimg.com/tweet_video/G.mp4"}]}}}"""))
+    }
+
     @Test fun whenToTryPictures() {
         assertTrue(Photos.worthTrying("ERROR: [twitter] 2125: No video could be found in this tweet"))
         assertFalse(Photos.worthTrying("ERROR: Unable to download webpage: timed out"))

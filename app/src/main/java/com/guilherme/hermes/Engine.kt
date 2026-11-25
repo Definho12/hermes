@@ -236,16 +236,16 @@ object Engine {
         // no video there: maybe it is a post with only pictures
         var photoTrace = ""
         if (made.isEmpty() && (photoOnly || Photos.tweet(item.source) != null || Photos.worthTrying(error))) {
-            set(id) { it.copy(message = "Procurando a imagem…", pct = 0f) }
+            set(id) { it.copy(message = "Procurando a mídia do post…", pct = 0f) }
             val pd = File(dir, "fotos").apply { mkdirs() }
             made = try {
-                Photos.download(item.source, pd) { i, n -> set(id) { it.copy(message = if (n > 1) "Baixando imagem $i de $n" else "Baixando a imagem", pct = 100f * (i - 1) / n) } }
+                Photos.download(item.source, pd) { i, n -> set(id) { it.copy(message = if (n > 1) "Baixando $i de $n" else "Baixando do post", pct = 100f * (i - 1) / n) } }
             } catch (e: Throwable) { emptyList() }
             photoTrace = Photos.trace.toString()
             if (id in canceled) { dir.deleteRecursively(); return }
         }
         if (made.isEmpty()) {
-            val msg = if (photoOnly) "Não consegui pegar a imagem desse post" else Formats.friendly(error)
+            val msg = if (photoOnly) "Não consegui pegar a imagem ou o GIF desse post" else Formats.friendly(error)
             val detail = listOf(error, photoTrace).filter { it.isNotBlank() }.joinToString("\n\nImagens:\n")
             set(id) { it.copy(state = State.Failed, message = msg, detail = detail.take(4000)) }
             dir.deleteRecursively()
