@@ -9,6 +9,7 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import com.guilherme.hermes.shared.Choice
 import com.guilherme.hermes.shared.Formats
+import com.guilherme.hermes.shared.Photos
 import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -206,7 +207,9 @@ object Engine {
         var error = ""
         var lastUi = 0L
         var pos: Pair<Int, Int>? = null
-        try {
+        // a link to one photo (x.com/…/photo/1): yt-dlp only knows video, go straight to the picture
+        val photoOnly = Photos.isPhotoLink(item.source)
+        if (!photoOnly) try {
             YoutubeDL.execute(req, "dl-$id", false) { progress, _, line ->
                 if (id in canceled) return@execute
                 Formats.titleFrom(line)?.let { t -> set(id) { it.copy(title = t) } }
@@ -226,12 +229,25 @@ object Engine {
         }
         if (id in canceled) { dir.deleteRecursively(); return }
 
-        val made = dir.listFiles().orEmpty().filter { f ->
+        var made = dir.listFiles().orEmpty().filter { f ->
             f.isFile && f.length() > 0 && f.extension.lowercase() !in Formats.leftovers && !f.name.contains(".temp.") &&
                 !Regex("\\.f\\d+[-\\w]*\\.\\w+$").containsMatchIn(f.name)
         }.sortedBy { it.lastModified() }
+        // no video there: maybe it is a post with only pictures
+        var photoTrace = ""
+        if (made.isEmpty() && (photoOnly || Photos.tweet(item.source) != null || Photos.worthTrying(error))) {
+            set(id) { it.copy(message = "Procurando a imagem…", pct = 0f) }
+            val pd = File(dir, "fotos").apply { mkdirs() }
+            made = try {
+                Photos.download(item.source, pd) { i, n -> set(id) { it.copy(message = if (n > 1) "Baixando imagem $i de $n" else "Baixando a imagem", pct = 100f * (i - 1) / n) } }
+            } catch (e: Throwable) { emptyList() }
+            photoTrace = Photos.trace.toString()
+            if (id in canceled) { dir.deleteRecursively(); return }
+        }
         if (made.isEmpty()) {
-            set(id) { it.copy(state = State.Failed, message = Formats.friendly(error), detail = error.take(4000)) }
+            val msg = if (photoOnly) "Não consegui pegar a imagem desse post" else Formats.friendly(error)
+            val detail = listOf(error, photoTrace).filter { it.isNotBlank() }.joinToString("\n\nImagens:\n")
+            set(id) { it.copy(state = State.Failed, message = msg, detail = detail.take(4000)) }
             dir.deleteRecursively()
             return
         }
@@ -261,6 +277,7 @@ object Engine {
     fun folderFor(mime: String): String = when {
         mime.startsWith("video") -> Environment.DIRECTORY_MOVIES + "/Swallow"
         mime.startsWith("audio") -> Environment.DIRECTORY_MUSIC + "/Swallow"
+        mime.startsWith("image") -> Environment.DIRECTORY_PICTURES + "/Swallow"
         else -> Environment.DIRECTORY_DOWNLOADS + "/Swallow"
     }
 
@@ -281,6 +298,7 @@ object Engine {
         val collection = when {
             mime.startsWith("video") -> MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
             mime.startsWith("audio") -> MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+            mime.startsWith("image") -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
             else -> MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         }
         val values = ContentValues().apply {

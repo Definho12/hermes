@@ -12,8 +12,8 @@ android {
         applicationId = "com.guilherme.hermes"
         minSdk = 29
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
 
         ndk {
             // only modern phones: keeps the app much smaller
@@ -62,6 +62,7 @@ android {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")  // org.json is only a stub in local tests
     val bom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(bom)
     implementation("androidx.compose.ui:ui")

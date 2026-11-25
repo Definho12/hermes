@@ -29,6 +29,7 @@ dependencies {
 
 tasks.test {
     environment("HERMES_TEST_URL", System.getenv("HERMES_TEST_URL") ?: "")
+    environment("HERMES_NET", System.getenv("HERMES_NET") ?: "")
     testLogging { events("failed", "passed"); showStandardStreams = true; exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL }
 }
 

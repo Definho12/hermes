@@ -357,7 +357,7 @@ private fun DownloadRow(item: Item, onDetails: (Item) -> Unit) {
 @Composable
 private fun EmptyHint() {
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("Funciona com YouTube, Instagram, TikTok, X, Facebook, Reddit, Kwai, SoundCloud, Vimeo, Twitch e centenas de outros sites.",
+        Text("Funciona com YouTube, Instagram, TikTok, X, Facebook, Reddit, Kwai, SoundCloud, Vimeo, Twitch e centenas de outros sites. Posts só com foto (como no X) baixam a imagem.",
             color = C.Sub, fontSize = 14.sp, fontFamily = Inter, lineHeight = 20.sp)
         Text("Dica: em qualquer app, toque em Compartilhar e escolha Swallow.",
             color = C.Faint, fontSize = 13.sp, fontFamily = Inter, lineHeight = 18.sp)
@@ -369,7 +369,7 @@ private fun Footer() {
     val version by Engine.version.collectAsState()
     val status by Engine.updateStatus.collectAsState()
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Vídeos ficam em Filmes › Swallow (aparecem na galeria). Áudios ficam em Música › Swallow.",
+        Text("Vídeos ficam em Filmes › Swallow e fotos em Imagens › Swallow (aparecem na galeria). Áudios ficam em Música › Swallow.",
             color = C.Faint, fontSize = 12.sp, fontFamily = Inter, lineHeight = 17.sp)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Motor de download: " + (version ?: "preparando…") + (status?.let { " · $it" } ?: ""),

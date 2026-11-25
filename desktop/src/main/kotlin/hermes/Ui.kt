@@ -382,7 +382,7 @@ private fun DownloadRow(item: Item) {
 @Composable
 private fun EmptyHint() {
     Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("Funciona com YouTube, Instagram, TikTok, X, Facebook, Reddit, Kwai, SoundCloud, Vimeo, Twitch e centenas de outros sites.",
+        Text("Funciona com YouTube, Instagram, TikTok, X, Facebook, Reddit, Kwai, SoundCloud, Vimeo, Twitch e centenas de outros sites. Posts só com foto (como no X) baixam a imagem.",
             color = C.Sub, fontSize = 14.sp, fontFamily = Inter, lineHeight = 20.sp)
         Text("Dica: dá para colar vários links de uma vez, um por linha.",
             color = C.Faint, fontSize = 13.sp, fontFamily = Inter, lineHeight = 18.sp)

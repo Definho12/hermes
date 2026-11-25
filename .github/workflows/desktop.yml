@@ -31,7 +31,7 @@ jobs:
         working-directory: desktop
         run: |
           set -o pipefail
-          export HERMES_TEST_URL="http://127.0.0.1:8765/Video%20de%20teste.mp4" APPDATA=/tmp/appdata-test
+          export HERMES_TEST_URL="http://127.0.0.1:8765/Video%20de%20teste.mp4" APPDATA=/tmp/appdata-test HERMES_NET=1
           gradle test --no-daemon --console=plain 2>&1 | tee ../build.log
       - name: Screenshots
         working-directory: desktop

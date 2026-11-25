@@ -128,7 +128,11 @@ class DownloadService : Service() {
             val n = NotificationCompat.Builder(ctx, CH_DONE)
                 .setSmallIcon(R.drawable.ic_notif)
                 .setContentTitle("Pronto: " + item.shownTitle.take(80))
-                .setContentText(if (file?.mime?.startsWith("video") == true) "Salvo em Filmes › Swallow" else "Salvo em Música › Swallow")
+                .setContentText(when {
+                    file?.mime?.startsWith("video") == true -> "Salvo em Filmes › Swallow"
+                    file?.mime?.startsWith("image") == true -> "Salvo em Imagens › Swallow"
+                    else -> "Salvo em Música › Swallow"
+                })
                 .setContentIntent(tap)
                 .setAutoCancel(true)
                 .setColor(0xFF8FD9AE.toInt())
